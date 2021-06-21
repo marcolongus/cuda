@@ -30,7 +30,7 @@ int main(void){
 	
 	//launch add() kernel on GPU
 	add<<<1,1>>>(a,b,c);
-	cudaDeviceSynchronize();
+	cudaDeviceSynchronize(); 
 
 	printf("despues del kernel c: %d\n", *c);
 
