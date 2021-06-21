@@ -17,22 +17,24 @@ int main(void){
 	int *a, *b, *c;          //host copies of a,b,c
 	int size = sizeof(int);
 
-	//allocate space for device copies of a,b,c
-	cudaMallocManaged(&a, size); //cuando va??? (void **), como ir a cuda Managed, agregar check error. 
+	// Allocate Unified Memory -- accessible from CPU or GPU
+	cudaMallocManaged(&a, size); //cuando va??? (void **)
 	cudaMallocManaged(&b, size);
 	cudaMallocManaged(&c, size);
 
 	*a = 1;
 	*b = 1;
 	*c = 5;
-	
+
 	printf("antes del kernel c: %d\n", *c);
+	
 	//launch add() kernel on GPU
 	add<<<1,1>>>(a,b,c);
 	cudaDeviceSynchronize();
 
 	printf("despues del kernel c: %d\n", *c);
-	//cleanup
+
+	//cleanup memory
 	cudaFree(a); cudaFree(b); cudaFree(c);
 
 	return 0;
