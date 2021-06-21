@@ -8,36 +8,32 @@
 __global__ void add(int *a, int *b, int *c){
 	*c = *a + *b; //ver si funciona sin lo sastericos
 	int d = *c + 1; 
-	printf("kernel %d\n", d);
+	printf("kernel d=c+1: %d\n", d);
+	printf("kernel c    : %d\n", *c);
 }
 
 int main(void){
 
-	int a, b, c;          //host copies of a,b,c
-	int *d_a, *d_b, *d_c; //device copies of a, b,c
+	int *a, *b, *c;          //host copies of a,b,c
 	int size = sizeof(int);
 
 	//allocate space for device copies of a,b,c
-	cudaMalloc(&d_a, size); //cuando va??? (void **), como ir a cuda Managed, agregar check error. 
-	cudaMalloc(&d_b, size);
-	cudaMalloc(&d_c, size);
+	cudaMallocManaged(&a, size); //cuando va??? (void **), como ir a cuda Managed, agregar check error. 
+	cudaMallocManaged(&b, size);
+	cudaMallocManaged(&c, size);
 
-	a = 1;
-	b = 1;
-
-	//copy inputs to device
-	cudaMemcpy(d_a, &a, size, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_b, &b, size, cudaMemcpyHostToDevice);
-
+	*a = 1;
+	*b = 1;
+	*c = 5;
+	
+	printf("antes del kernel c: %d\n", *c);
 	//launch add() kernel on GPU
-	add<<<1,1>>>(d_a,d_b,d_c);
+	add<<<1,1>>>(a,b,c);
+	cudaDeviceSynchronize();
 
-	//copy result back to host
-	cudaMemcpy(&c,d_c,size,cudaMemcpyDeviceToHost);
-
-	printf("fuera del kernel %i\n", c);
+	printf("despues del kernel c: %d\n", *c);
 	//cleanup
-	cudaFree(d_a); cudaFree(d_b); cudaFree(d_c);
+	cudaFree(a); cudaFree(b); cudaFree(c);
 
 	return 0;
 }
