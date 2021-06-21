@@ -18,9 +18,9 @@ int main(void){
 	int size = sizeof(int);
 
 	//allocate space for device copies of a,b,c
-	cudaMalloc((void  **)&d_a, size); //cuando va??? (void **), como ir a cuda Managed, agregar check error. 
-	cudaMalloc((void  **)&d_b, size);
-	cudaMalloc((void  **)&d_c, size);
+	cudaMalloc(&d_a, size); //cuando va??? (void **), como ir a cuda Managed, agregar check error. 
+	cudaMalloc(&d_b, size);
+	cudaMalloc(&d_c, size);
 
 	a = 1;
 	b = 1;
@@ -35,7 +35,7 @@ int main(void){
 	//copy result back to host
 	cudaMemcpy(&c,d_c,size,cudaMemcpyDeviceToHost);
 
-	printf("%i\n", c);
+	printf("fuera del kernel %i\n", c);
 	//cleanup
 	cudaFree(d_a); cudaFree(d_b); cudaFree(d_c);
 
