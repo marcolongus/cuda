@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
-#include <curand.h>
+#include <curand.h>//host API: call happen in the host. 
+#include <curand_kernel.h> //deveci API: call happen within kernel
 
 // compilar:
 // nvcc -o program program.cu -l curand
@@ -25,7 +26,7 @@ __global__ void montecarlo_pi(int N, int *count, float *x, float *y)
 
 int main(){
 
-	int N = 1<<24; //no deberia poder ir 1<<31 -1 ??
+	int N = 1<<27; //no deberia poder ir 1<<31 -1 ??
 	int blockSize = 512; //cada bloque procesa 6 mb 
 	int numBlock = (N + blockSize - 1)/blockSize;
 
@@ -58,16 +59,18 @@ int main(){
 		//Generate N floats on device
 		curandGenerateUniform(gen, d_x, N);
 		curandGenerateUniform(gen, d_y, N);
-		cudaDeviceSynchronize(); //hace falta?
+
 		//Call kernel
 		montecarlo_pi<<<numBlock,blockSize>>>(N,count,d_x,d_y);
 		cudaDeviceSynchronize(); //hace falta?
-		float pi_calc=0;
+		
+		int pi_calc=0;
 		for (int i=0; i<N; i++){
 			if (count[i] !=0 ) pi_calc++;
 		}
-		printf("pi %f \n", 4.0f*pi_calc/(float)N);
-		pi_total+=4.0f*pi_calc/(float)N;
+
+		printf("pi %f \n", 4.0f*(float)pi_calc/(float)N);
+		pi_total+=4.0f*(float)pi_calc/(float)N;
 	}
 	printf("pi total %f \n", pi_total/(float)n_sim);
 
